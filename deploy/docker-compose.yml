@@ -1,6 +1,6 @@
 # Sirve el repo de sketches como estático, aislado del stack Supabase.
-# Publica solo en loopback; Caddy lo alcanza vía el gateway del bridge (172.18.0.1:8088),
-# mismo patrón que el reverse_proxy :3000 ya existente en javierlaborde.com.
+# Se une a la red supabase_default para que caddy-container lo alcance por nombre
+# (reverse_proxy p5js-web:80). No expone puertos al host.
 #
 # Deploy en VM:
 #   cd /opt/p5js
@@ -10,7 +10,12 @@ services:
     image: nginx:alpine
     container_name: p5js-web
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8088:80"
+    networks:
+      - supabase
     volumes:
       - /opt/p5js:/usr/share/nginx/html:ro
+
+networks:
+  supabase:
+    external: true
+    name: supabase_default
