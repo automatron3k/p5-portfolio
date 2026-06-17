@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────────────────
+# Cambio a aplicar en /opt/supabase/docker/volumes/caddy/Caddyfile
+#
+# ANTES el bloque era:
+#
+#   javierlaborde.com {
+#     reverse_proxy 172.18.0.1:3000
+#   }
+#
+# DESPUÉS (agrega /p5js antes del catch-all, sin tocar el :3000):
+# ─────────────────────────────────────────────────────────────────────────
+
+javierlaborde.com {
+  redir /p5js /p5js/
+  handle_path /p5js/* {
+    reverse_proxy 172.18.0.1:8088
+  }
+  handle {
+    reverse_proxy 172.18.0.1:3000
+  }
+}
+
+# Recargar sin downtime:
+#   docker exec caddy-container caddy reload --config /etc/caddy/Caddyfile

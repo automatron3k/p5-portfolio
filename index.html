@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>p5.js · Javier Laborde</title>
+    <style>
+      :root {
+        --bg: #0e0f13;
+        --card: #181a21;
+        --line: #262932;
+        --fg: #e7e9ee;
+        --muted: #8b90a0;
+        --accent: #f6c945;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      header {
+        padding: 56px 24px 28px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.02em; }
+      header p { margin: 0; color: var(--muted); }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px 80px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+      }
+      a.card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: border-color .15s, transform .15s;
+      }
+      a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .thumb {
+        aspect-ratio: 3 / 2;
+        background: #0a0b0e;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+      .thumb iframe {
+        width: 100%; height: 100%; border: 0;
+        pointer-events: none;
+      }
+      .body { padding: 14px 16px 16px; }
+      .title { font-weight: 600; margin: 0 0 4px; }
+      .meta { color: var(--muted); font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .badge {
+        font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+        color: var(--bg); background: var(--accent);
+        padding: 2px 7px; border-radius: 999px; font-weight: 700;
+      }
+      .empty { color: var(--muted); grid-column: 1 / -1; padding: 40px 0; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Generative sketches</h1>
+      <p>p5.js · The Coding Train + The Nature of Code · <span id="count">…</span></p>
+    </header>
+    <main id="grid"></main>
+
+    <script>
+      async function load() {
+        const grid = document.getElementById("grid");
+        let data;
+        try {
+          const res = await fetch("manifest.json?" + Date.now());
+          data = await res.json();
+        } catch (e) {
+          grid.innerHTML = '<p class="empty">No se pudo cargar manifest.json. Corre <code>python3 build.py</code>.</p>';
+          return;
+        }
+        document.getElementById("count").textContent = data.count + " sketches";
+        if (!data.sketches.length) {
+          grid.innerHTML = '<p class="empty">Aún no hay sketches. Copia <code>template/</code> en <code>sketches/&lt;proyecto&gt;/&lt;nombre&gt;/</code>.</p>';
+          return;
+        }
+        for (const s of data.sketches) {
+          const a = document.createElement("a");
+          a.className = "card";
+          a.href = s.path;
+          a.innerHTML =
+            '<div class="thumb"><iframe loading="lazy" src="' + s.path + '"></iframe></div>' +
+            '<div class="body">' +
+            '<p class="title">' + esc(s.title) + '</p>' +
+            '<div class="meta"><span class="badge">' + esc(s.project) + '</span>' +
+            (s.date ? '<span>' + esc(s.date) + '</span>' : '') +
+            '</div></div>';
+          grid.appendChild(a);
+        }
+      }
+      function esc(t) {
+        const d = document.createElement("div");
+        d.textContent = t == null ? "" : String(t);
+        return d.innerHTML;
+      }
+      load();
+    </script>
+  </body>
+</html>
